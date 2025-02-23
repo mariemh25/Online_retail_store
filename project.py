@@ -8,7 +8,7 @@ c = conn.cursor()
 # Create tables
 c.execute('''
 CREATE TABLE IF NOT EXISTS Products (
-    product_id INTEGER PRIMARY KEY,
+    product_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
     category TEXT,
     price REAL,
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS Products (
 
 c.execute('''
 CREATE TABLE IF NOT EXISTS Customers (
-    customer_id INTEGER PRIMARY KEY,
+    customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
     email TEXT,
     phone_number TEXT
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS Customers (
 
 c.execute('''
 CREATE TABLE IF NOT EXISTS Orders (
-    order_id INTEGER PRIMARY KEY,
+    order_id INTEGER PRIMARY KEY AUTOINCREMENT,
     customer_id INTEGER,
     product_id INTEGER,
     order_date TEXT,
@@ -79,6 +79,7 @@ WHERE quantity > 1 OR order_date BETWEEN '2025-01-01' AND '2025-01-02';
 '''
 orders_with_multaple_conditions = pd.read_sql(s, conn)
 print("Orders with Multiple conditions:\n", orders_with_multaple_conditions)
+print("_______________________________________________________________")
 
 
 
@@ -91,6 +92,7 @@ JOIN Products ON Orders.product_id = Products.product_id;
 '''
 order_details = pd.read_sql(s, conn)
 print("\nOrder Details:\n", order_details)
+print("_______________________________________________________________")
 
 
 
@@ -106,6 +108,7 @@ WHERE customer_id IN (
 '''
 top_customer = pd.read_sql(s, conn)
 print("\nTop Customer:\n", top_customer)
+print("_______________________________________________________________")
 
 conn.commit()
 #--------------------------------------------------------------------------------------------------------
@@ -119,6 +122,7 @@ GROUP BY category;
 
 sales_report = pd.read_sql(sales_report, conn)
 print("Sales Report by Category:\n", sales_report)
+print("_______________________________________________________________")
 
 # 2. Identify customers who made repeat purchases
 repeat_customers = '''
@@ -131,10 +135,11 @@ HAVING total_orders > 1;
 
 repeat_customers = pd.read_sql(repeat_customers, conn)
 print("\nRepeat Customers:\n", repeat_customers)
+print("_______________________________________________________________")
 
 # 3. Analyze stock levels to determine reordering requirements
 stock_levels = '''
-SELECT name, stock
+SELECT name, stock, category
 FROM Products
 WHERE stock < 10;
 '''
@@ -148,9 +153,33 @@ low_stock.to_csv('low_stock.csv', index=False)
 
 conn.close()
 
-
 sales_report_df = pd.read_csv('sales_report.csv')
 
 # Display the first few rows of the DataFrame
 print(sales_report_df.head())
+
+sales_report_df = pd.read_csv('sales_report.csv')
+repeat_customers_df = pd.read_csv('repeat_customers.csv')
+low_stock_df = pd.read_csv('low_stock.csv')
+
+print("Sales Report:\n", sales_report_df.head())
+print("_______________________________________________________________")
+print("\nRepeat Customers:\n", repeat_customers_df.head())
+print("_______________________________________________________________")
+print("\nLow Stock Products:\n", low_stock_df.head())
+print("_______________________________________________________________")
+
+# add column for taxes
+sales_report_df['tax'] = sales_report_df['total_sales'] * 0.20
+print(sales_report_df)
+print("_______________________________________________________________")
+#Access rows using iloc
+electronics_sales = sales_report_df.iloc[1]
+print('electronics_sales:',electronics_sales)
+print("_______________________________________________________________")
+
+# delete coloumn
+low_stock_df2=low_stock_df.drop(columns='category')
+print(low_stock_df2)
+
 
